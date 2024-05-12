@@ -30,7 +30,7 @@ def process_video(input_video_path, output_video_path):
                                                                 )
     player_ball_detections = player_ball_tracker.interpolate_ball_positions(player_ball_detections)
 
-    court_line_detector = CourtLineDetector("models/keypoints_1_69.model.h5")
+    court_line_detector = CourtLineDetector("models/keypoints_ 0_3093loos.model.h5")
     court_keypoints = court_line_detector.predict(video_frames[0])
     mini_court = MiniCourt(video_frames[0])
 
