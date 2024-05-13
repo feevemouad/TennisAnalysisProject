@@ -1,12 +1,12 @@
-from utils import (read_video, save_video, compute_homography)
+import streamlit as st
+import cv2
+import os
+from utils import (read_video, save_video, compute_homography, icon)
+from moviepy.editor import VideoFileClip
+from tempfile import NamedTemporaryFile
 from trackers import PlayerBallTracker
 from court_line_detector import CourtLineDetector
 from mini_court import MiniCourt
-import cv2
-import streamlit as st
-import os
-from tempfile import NamedTemporaryFile
-from moviepy.editor import VideoFileClip
 
 def release_and_delete_file(path):
     """Attempt to release and delete a file, retrying if it fails."""
@@ -25,7 +25,7 @@ def process_video(input_video_path, output_video_path):
 
     player_ball_tracker = PlayerBallTracker(model_path="models/player_and_ball_best.pt")
     player_ball_detections = player_ball_tracker.detect_frames( video_frames,
-                                                                read_from_stub=False,
+                                                                read_from_stub=True,
                                                                 stub_path="tracker_stubs/player_ball_detections.pkl"
                                                                 )
     player_ball_detections = player_ball_tracker.interpolate_ball_positions(player_ball_detections)
@@ -53,31 +53,95 @@ def process_video(input_video_path, output_video_path):
     clip = VideoFileClip(output_video_path)
     clip.write_videofile(output_video_path[:-4] + "_h264.mp4", codec='libx264')
 
-def main():
-    # Streamlit UI
-    st.title("Tennis Analysis App")
+def configure_sidebar():
+    with st.sidebar:
+        with st.form("my_form"):
+            st.info("**Yo fam! Start here ↓**", icon="👋🏾")
+            st.markdown('Start analyzing tennis videos with ease! Simply upload your videos and explore a wealth of insights to improve your game.')
+            video_file = st.file_uploader("Choose a video...", type=["mp4", "avi"])
+            submitted = st.form_submit_button(
+                    "Submit", type="primary", use_container_width=True)
 
-    video_file = st.file_uploader("Upload a video file", type=["mp4", "avi"])
+        # Credits and resources
+        st.divider()
+        st.markdown(
+            ":orange[**GitHub Repository:**]   \n"
+            ":black[Explore our codebase and contribute to the future of tennis analysis on our [GitHub](https://github.com/feevemouad/TennisAnalysisProject) repository.]    \n"
+            ":orange[**Contact Us:**]   \n"
+            ":black[For inquiries or feedback, please reach out to us at [Gmail](mailto:mouad02aithammou@gmail.com).]"
+        )
+        return submitted, video_file
 
-    if video_file is not None:
-        st.video(video_file)
-        
-        if st.button("Process Video"):
-            with st.spinner('Processing video...'):
+def main_page(submitted,video_file):
+    """Main page layout.
+    """
+    ab = True
+    with preprocessed_video.container():
+        if submitted:
+            if video_file is not None:
+                st.divider()
+                st.markdown("### :orange[**Input Video:**]")
+                st.video(video_file)
+
+            # if st.button("Process Video"):
+            with st.spinner("Processing video... Stand up and strecth in the meantime 🙆‍♀️"):
                 with NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_input_file, NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_output_file:
                     tmp_input_file.write(video_file.read())
                     tmp_input_file.flush()  # Ensure all data is written
                     os.fsync(tmp_input_file.fileno())  # Ensure all data is written to disk
-
+                    tmp_input_file.seek(0)
                     process_video(tmp_input_file.name, tmp_output_file.name)
-
                     # Display processed video
-                    st.subheader("Processed Video")
+                    st.divider()
+                    st.markdown("### :orange[**Output Video:**]")
                     st.video(tmp_output_file.name[:-4] + "_h264.mp4")
-
                 release_and_delete_file(tmp_input_file.name)
                 release_and_delete_file(tmp_output_file.name)
+                ab = False
+    
+            
+    # If not submitted, chill here 🍹
+        else:
+            pass
+    if ab:    
+        with about.container():
+            st.markdown("""
+                **About**
                 
+                Welcome to Tennis Analysis System, your go-to platform for advanced tennis analysis using state-of-the-art technology. Our application integrates machine learning, computer vision, and deep learning techniques to provide comprehensive insights into tennis player performance. Whether you're a coach, player, or enthusiast, our interface offers intuitive tools to enhance your understanding of the game.
+
+                """)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.image("video\img_source.png", caption="Input")
+            with col2:
+                st.image("video\img_output.png", caption="Output")
                 
+            st.markdown("""
+                **Features**
+                
+                - **Player Detection**: Accurately identify players and tennis balls in videos using YOLOv8.
+                - **Key Point Extraction**: Extract critical court keypoints using CNNs to understand player movements.
+                - **Video Analysis**: Analyze player speed, ball shot speed, and shot counts with ease using CV2.
+                - **Data-Driven Insights**: Leverage advanced analytics for a data-driven approach to feature development.
+
+                **Get Started**
+                Start analyzing tennis videos with ease! Simply upload your videos and explore a wealth of insights to improve your game.
+
+                """)
+
+# UI configurations
+st.set_page_config(page_title="Tennis Analysis System",
+                   page_icon="🎾",
+                   layout="wide")
+icon.show_icon(":foggy:")
+st.markdown("# :rainbow[Tennis Analysis System]")
+
+# Placeholders for images and gallery
+preprocessed_video = st.empty()
+about = st.empty()
+
 if __name__ == "__main__":
-    main()
+    submitted, video_file = configure_sidebar()
+    main_page(submitted, video_file)
