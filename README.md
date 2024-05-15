@@ -5,12 +5,7 @@
 The Tennis Analysis System leverages advanced computer vision techniques to analyze tennis matches. By detecting keypoints of the court, players, and the ball, the system provides detailed insights into player movements and ball dynamics.
 
 ### Demo
-<p align="center">
-  <video width="1000" controls>
-    <source src="video\Demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</p>
+https://github.com/feevemouad/TennisAnalysisProject/assets/105555280/959440a4-41e5-43c2-89d2-c4f5241b78bd
 
 ### Features
 
