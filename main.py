@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import os
+import time
 from utils import (read_video, save_video, compute_homography, icon)
 from moviepy.editor import VideoFileClip
 from tempfile import NamedTemporaryFile
@@ -25,7 +26,7 @@ def process_video(input_video_path, output_video_path):
 
     player_ball_tracker = PlayerBallTracker(model_path="models/player_and_ball_best.pt")
     player_ball_detections = player_ball_tracker.detect_frames( video_frames,
-                                                                read_from_stub=True,
+                                                                read_from_stub=False,
                                                                 stub_path="tracker_stubs/player_ball_detections.pkl"
                                                                 )
     player_ball_detections = player_ball_tracker.interpolate_ball_positions(player_ball_detections)
